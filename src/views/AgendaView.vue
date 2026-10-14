@@ -2,33 +2,27 @@
 // Page Agenda : grille quotidienne des salles.
 // Une colonne par salle, une ligne par créneau de 30 minutes,
 // selon les horaires d'ouverture du jour affiché.
-// Un clic sur une case libre ouvre la fenêtre de réservation.
+// - Clic sur une case libre (ou bouton « Nouvelle réservation ») : formulaire de réservation.
+// - Clic sur un rendez-vous : détail, avec un bouton pour le supprimer.
 import { ref, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
 import Button from 'primevue/button'
 import DatePicker from 'primevue/datepicker'
 import Message from 'primevue/message'
 import { Flower } from 'lucide-vue-next'
-import ReservationDialog from '../components/ReservationDialog.vue'
-import { salles, praticiens, horaires } from '../config.js'
+import ReservationForm from '../components/ReservationForm.vue'
+import ReservationDetails from '../components/ReservationDetails.vue'
+import TypeIcon from '../components/TypeIcon.vue'
+import { salles, typesRendezVous } from '../config.js'
 import { formatLocal } from '../i18n.js'
-import {
-  aujourdhui,
-  estDimanche,
-  jourOuvrableVoisin,
-  dateEnToutesLettres,
-  creneauxDuJour,
-  dateISO,
-  cleJour
-} from '../dates.js'
-import { lireReservations, reservationDuCreneau } from '../storage.js'
+import { aujourdhui, jourOuvrableVoisin, dateEnToutesLettres, creneauxDuJour, dateISO } from '../dates.js'
+import { lireReservations } from '../storage.js'
+import { formaterHeure, trouverPraticien, nomCourt, nomPatient } from '../format.js'
 
-const { locale } = useI18n()
+// --- Jour affiché et navigation ---
 
 // Jour affiché (au départ : aujourd'hui)
 const jourAffiche = ref(aujourdhui())
 
-// Boutons de navigation
 function jourPrecedent() {
   jourAffiche.value = jourOuvrableVoisin(jourAffiche.value, -1)
 }
@@ -47,74 +41,94 @@ function choisirDate(date) {
 // Vrai si le jour affiché est aujourd'hui (pour désactiver le bouton « Aujourd'hui »)
 const estAujourdhui = computed(() => dateISO(jourAffiche.value) === dateISO(aujourdhui()))
 
-// Date en toutes lettres, recalculée quand la langue ou le jour changent
+// Date en toutes lettres avec une majuscule : « Samedi 17 octobre 2026 ».
+// formatLocal() lit la langue choisie : le texte change avec la langue.
 const titreJour = computed(() => {
-  locale.value // dépendance : on recalcule si la langue change
-  return dateEnToutesLettres(jourAffiche.value, formatLocal())
+  const texte = dateEnToutesLettres(jourAffiche.value, formatLocal())
+  return texte.charAt(0).toUpperCase() + texte.slice(1)
 })
 
 // Créneaux du jour affiché (liste vide si le centre est fermé)
 const creneaux = computed(() => creneauxDuJour(jourAffiche.value))
 
-// Heure d'un créneau au format local suisse ('08:30' → « 08:30 »)
-function formaterHeure(creneau) {
-  locale.value // dépendance : on recalcule si la langue change
-  const [h, m] = creneau.split(':').map(Number)
-  const date = new Date(2000, 0, 1, h, m)
-  return new Intl.DateTimeFormat(formatLocal(), { hour: '2-digit', minute: '2-digit' }).format(date)
-}
+// --- Réservations ---
 
 // Réservations enregistrées dans le navigateur.
-// ref() : la grille se met à jour toute seule quand on en ajoute une.
+// ref() : la grille se met à jour toute seule quand on en ajoute ou en supprime une.
 const reservations = ref(lireReservations())
 
-// Réservation qui occupe une case de la grille (ou undefined si la case est libre)
-function reservation(salle, creneau) {
-  return reservationDuCreneau(reservations.value, salle.id, dateISO(jourAffiche.value), creneau)
-}
-
-// Nom court du praticien d'une réservation : « Dre Chappuis », « Sophie Cuendet »
-function nomPraticien(r) {
-  const p = praticiens.find((p) => p.id === r.praticienId)
-  if (!p) return ''
-  return p.titre ? `${p.titre} ${p.nom}` : `${p.prenom} ${p.nom}`
-}
-
-// --- Réservation d'un créneau ---
-
-// Ce qui a été cliqué : la salle et le créneau de début
-const fenetreOuverte = ref(false)
-const salleChoisie = ref(null)
-const debutChoisi = ref('')
-
-// Clic sur une case libre : on ouvre la fenêtre de réservation
-function ouvrirReservation(salle, creneau) {
-  salleChoisie.value = salle
-  debutChoisi.value = creneau
-  fenetreOuverte.value = true
-}
-
-// Heures de fin possibles : de 30 minutes après le début
-// jusqu'à la prochaine réservation de la salle ou jusqu'à la fermeture.
-const finsPossibles = computed(() => {
-  if (!salleChoisie.value) return []
+// Contenu de la grille : pour chaque créneau, une case par salle.
+// Une case peut être :
+//  - 'libre'   : personne n'a réservé la salle à cette heure ;
+//  - 'debut'   : un rendez-vous commence ici (il s'étend sur « hauteur » lignes) ;
+//  - 'couverte': la case est cachée sous un rendez-vous commencé plus haut.
+const lignes = computed(() => {
+  const date = dateISO(jourAffiche.value)
+  const duJour = reservations.value.filter((r) => r.date === date)
   const liste = creneaux.value
-  const fermeture = horaires[cleJour(jourAffiche.value)]?.fermeture
-  const fins = []
-  for (let i = liste.indexOf(debutChoisi.value); i >= 0 && i < liste.length; i++) {
-    if (reservation(salleChoisie.value, liste[i])) break // créneau déjà pris : on s'arrête
-    fins.push(liste[i + 1] ?? fermeture) // fin = début du créneau suivant (ou fermeture)
-  }
-  return fins
+
+  return liste.map((creneau, index) => ({
+    creneau,
+    cases: salles.map((salle) => {
+      const r = duJour.find((r) => r.salleId === salle.id && r.debut <= creneau && creneau < r.fin)
+      if (!r) return { salle, etat: 'libre' }
+      // Le bloc commence au début du rendez-vous (ou à la première ligne s'il commence avant)
+      if (r.debut !== creneau && index > 0) return { salle, etat: 'couverte' }
+      const hauteur = liste.filter((c) => c >= creneau && c < r.fin).length
+      return { salle, etat: 'debut', reservation: r, hauteur }
+    })
+  }))
 })
 
-// Après l'enregistrement : on ajoute la réservation à la grille
-function reservationAjoutee(nouvelle) {
-  reservations.value = [...reservations.value, nouvelle]
+// Type d'un rendez-vous (couleur, icône) ; les anciennes réservations sans type restent neutres
+function typeDe(r) {
+  return typesRendezVous.find((ty) => ty.id === r.type)
 }
 
-// Date en toutes lettres avec une majuscule, pour la fenêtre de réservation
-const titreJourMajuscule = computed(() => titreJour.value.charAt(0).toUpperCase() + titreJour.value.slice(1))
+// Texte affiché dans un bloc : praticien, puis patient (ou motif pour une réunion)
+function lignePraticien(r) {
+  const p = trouverPraticien(r.praticienId)
+  return p ? nomCourt(p) : ''
+}
+function ligneDetail(r) {
+  return nomPatient(r) || r.motif || ''
+}
+
+// --- Formulaire de réservation ---
+const formulaireOuvert = ref(false)
+const valeursDepart = ref({})
+
+// Bouton « Nouvelle réservation » : seule la date affichée est pré-remplie
+function nouvelleReservation() {
+  valeursDepart.value = { date: jourAffiche.value }
+  formulaireOuvert.value = true
+}
+
+// Clic sur une case libre : salle, date et heure pré-remplies
+function reserverCase(salle, creneau) {
+  valeursDepart.value = { salleId: salle.id, date: jourAffiche.value, debut: creneau }
+  formulaireOuvert.value = true
+}
+
+// Après l'enregistrement : on ajoute la réservation et on affiche son jour
+function reservationAjoutee(nouvelle) {
+  reservations.value = [...reservations.value, nouvelle]
+  const [a, m, j] = nouvelle.date.split('-').map(Number)
+  jourAffiche.value = new Date(a, m - 1, j)
+}
+
+// --- Détail et suppression ---
+const detailOuvert = ref(false)
+const reservationChoisie = ref(null)
+
+function ouvrirDetail(r) {
+  reservationChoisie.value = r
+  detailOuvert.value = true
+}
+
+function reservationSupprimee(id) {
+  reservations.value = reservations.value.filter((r) => r.id !== id)
+}
 </script>
 
 <template>
@@ -122,7 +136,7 @@ const titreJourMajuscule = computed(() => titreJour.value.charAt(0).toUpperCase(
     <div class="conteneur">
       <h1 class="titre-section">{{ $t('agenda.title') }}</h1>
 
-      <!-- Barre d'outils : navigation entre les jours et choix de la date -->
+      <!-- Barre d'outils : navigation entre les jours, choix de la date, nouvelle réservation -->
       <div class="outils">
         <Button
           icon="pi pi-chevron-left"
@@ -153,13 +167,24 @@ const titreJourMajuscule = computed(() => titreJour.value.charAt(0).toUpperCase(
         <Button
           :label="$t('agenda.today')"
           icon="pi pi-calendar"
+          severity="secondary"
+          outlined
           :disabled="estAujourdhui"
           @click="allerAujourdhui"
         />
+        <Button :label="$t('booking.newBooking')" icon="pi pi-plus" class="bouton-nouveau" @click="nouvelleReservation" />
       </div>
 
       <!-- Date affichée en toutes lettres -->
       <h2 class="titre-jour">{{ titreJour }}</h2>
+
+      <!-- Légende des types de rendez-vous -->
+      <ul class="legende">
+        <li v-for="ty in typesRendezVous" :key="ty.id">
+          <TypeIcon :icone="ty.icone" :couleur="ty.couleur" />
+          {{ $t('types.' + ty.id) }}
+        </li>
+      </ul>
 
       <!-- Jour de fermeture (ex. « Aujourd'hui » un dimanche) -->
       <Message v-if="creneaux.length === 0" severity="secondary" icon="pi pi-lock">
@@ -185,42 +210,75 @@ const titreJourMajuscule = computed(() => titreJour.value.charAt(0).toUpperCase(
             </tr>
           </thead>
           <tbody>
-            <tr v-for="creneau in creneaux" :key="creneau">
-              <th class="col-heure" scope="row">{{ formaterHeure(creneau) }}</th>
-              <td v-for="salle in salles" :key="salle.id" :class="{ reservee: reservation(salle, creneau) }">
-                <!-- Case réservée : nom du praticien sur la première case de la réservation -->
-                <span v-if="reservation(salle, creneau)" :title="$t('agenda.booked')">
-                  <template v-if="reservation(salle, creneau).debut === creneau">
-                    {{ nomPraticien(reservation(salle, creneau)) || $t('agenda.booked') }}
-                  </template>
-                </span>
-                <!-- Case libre : un bouton qui ouvre la fenêtre de réservation -->
-                <button
-                  v-else
-                  type="button"
-                  class="case-libre"
-                  :aria-label="$t('booking.bookSlot', { room: salle.nom, time: formaterHeure(creneau) })"
-                  @click="ouvrirReservation(salle, creneau)"
-                >
-                  <i class="pi pi-plus" aria-hidden="true"></i>
-                </button>
-              </td>
+            <tr v-for="ligne in lignes" :key="ligne.creneau">
+              <th class="col-heure" scope="row">{{ formaterHeure(ligne.creneau) }}</th>
+
+              <template v-for="c in ligne.cases" :key="c.salle.id">
+                <!-- Case libre : un bouton qui ouvre le formulaire -->
+                <td v-if="c.etat === 'libre'" class="case-libre">
+                  <button
+                    type="button"
+                    class="bouton-case"
+                    :aria-label="$t('booking.bookSlot', { room: c.salle.nom, time: formaterHeure(ligne.creneau) })"
+                    @click="reserverCase(c.salle, ligne.creneau)"
+                  >
+                    <i class="pi pi-plus" aria-hidden="true"></i>
+                  </button>
+                </td>
+
+                <!-- Rendez-vous : un bloc sur toute sa durée (rowspan) -->
+                <td v-else-if="c.etat === 'debut'" :rowspan="c.hauteur" class="case-rdv">
+                  <button
+                    type="button"
+                    class="rdv"
+                    :style="{ '--couleur-type': typeDe(c.reservation)?.couleur ?? '#8a96a0' }"
+                    :aria-label="
+                      $t('booking.openBooking', {
+                        details: [
+                          `${formaterHeure(c.reservation.debut)}–${formaterHeure(c.reservation.fin)}`,
+                          lignePraticien(c.reservation),
+                          ligneDetail(c.reservation)
+                        ].filter(Boolean).join(', ')
+                      })
+                    "
+                    @click="ouvrirDetail(c.reservation)"
+                  >
+                    <span class="rdv-ligne rdv-praticien">
+                      <TypeIcon
+                        v-if="typeDe(c.reservation)"
+                        :icone="typeDe(c.reservation).icone"
+                        :couleur="typeDe(c.reservation).couleur"
+                        :taille="14"
+                      />
+                      {{ lignePraticien(c.reservation) || $t('agenda.booked') }}
+                    </span>
+                    <span v-if="ligneDetail(c.reservation)" class="rdv-ligne rdv-detail">
+                      {{ ligneDetail(c.reservation) }}
+                    </span>
+                  </button>
+                </td>
+                <!-- 'couverte' : rien à afficher, le bloc du dessus occupe la place -->
+              </template>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Fenêtre de réservation (ouverte au clic sur une case libre) -->
-    <ReservationDialog
-      v-model:visible="fenetreOuverte"
-      :salle="salleChoisie"
-      :date="dateISO(jourAffiche)"
-      :dateTexte="titreJourMajuscule"
-      :debut="debutChoisi"
-      :finsPossibles="finsPossibles"
-      :formaterHeure="formaterHeure"
+    <!-- Formulaire de réservation -->
+    <ReservationForm
+      v-model:visible="formulaireOuvert"
+      :initial="valeursDepart"
+      :reservations="reservations"
       @reserve="reservationAjoutee"
+    />
+
+    <!-- Détail d'un rendez-vous, avec suppression -->
+    <ReservationDetails
+      v-model:visible="detailOuvert"
+      :reservation="reservationChoisie"
+      :dateTexte="titreJour"
+      @supprime="reservationSupprimee"
     />
   </section>
 </template>
@@ -235,14 +293,29 @@ const titreJourMajuscule = computed(() => titreJour.value.charAt(0).toUpperCase(
 .selecteur-date {
   width: 11rem;
 }
+/* Le bouton « Nouvelle réservation » est poussé à droite */
+.bouton-nouveau {
+  margin-left: auto;
+}
 .titre-jour {
   color: var(--couleur-principale);
   font-size: 1.3rem;
-  margin: 1.25rem 0 1rem;
+  margin: 1.25rem 0 0.5rem;
 }
-/* Première lettre en majuscule (« samedi » → « Samedi ») */
-.titre-jour::first-letter {
-  text-transform: uppercase;
+.legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: var(--texte-doux);
+}
+.legende li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 /* Conteneur qui permet de faire défiler la grille sur mobile */
@@ -254,7 +327,7 @@ const titreJourMajuscule = computed(() => titreJour.value.charAt(0).toUpperCase(
 }
 .grille {
   width: 100%;
-  min-width: 560px;
+  min-width: 640px;
   border-collapse: collapse;
   table-layout: fixed;
 }
@@ -262,8 +335,10 @@ const titreJourMajuscule = computed(() => titreJour.value.charAt(0).toUpperCase(
 .grille td {
   border-bottom: 1px solid var(--bordure);
   border-left: 1px solid var(--bordure);
+  height: 2.6rem;
+}
+.grille th {
   padding: 0.35rem 0.5rem;
-  height: 2.4rem;
 }
 .grille thead th {
   background: #ffffff;
@@ -286,43 +361,86 @@ const titreJourMajuscule = computed(() => titreJour.value.charAt(0).toUpperCase(
   font-weight: 500;
   text-align: right;
   font-variant-numeric: tabular-nums;
+  vertical-align: top;
 }
 /* Ligne de l'heure pleine plus marquée que la demi-heure */
-.grille tbody tr:nth-child(odd) th,
-.grille tbody tr:nth-child(odd) td {
+.grille tbody tr:nth-child(odd) > * {
   border-top: 1px solid #cfd8cf;
 }
-.grille tbody tr:hover td {
-  background: #f4f7f4;
-}
-/* Case réservée */
-.reservee {
-  background: #eef3f8 !important;
-  color: var(--couleur-principale);
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-align: center;
-}
+
 /* Case libre : le bouton remplit toute la case, le « + » apparaît au survol */
-.grille td:not(.reservee) {
+.case-libre {
   padding: 0;
 }
-.case-libre {
+.bouton-case {
   width: 100%;
   height: 100%;
-  min-height: 2.4rem;
+  min-height: 2.6rem;
   border: none;
   background: transparent;
   cursor: pointer;
   color: transparent;
 }
-.case-libre:hover,
-.case-libre:focus-visible {
+.bouton-case:hover,
+.bouton-case:focus-visible {
   background: #eef3f8;
   color: var(--couleur-principale);
 }
-.case-libre:focus-visible {
+.bouton-case:focus-visible {
   outline: 2px solid var(--couleur-principale);
   outline-offset: -2px;
+}
+
+/* Rendez-vous : bloc teinté de la couleur de son type, avec une bordure à gauche */
+.case-rdv {
+  padding: 2px;
+  vertical-align: top;
+}
+.rdv {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 1px;
+  width: 100%;
+  height: 100%;
+  min-height: calc(2.6rem - 4px);
+  padding: 0.2rem 0.4rem;
+  border: none;
+  border-left: 4px solid var(--couleur-type);
+  border-radius: 4px;
+  /* Fond très clair : la couleur du type mélangée à du blanc */
+  background: color-mix(in srgb, var(--couleur-type) 14%, #ffffff);
+  color: var(--texte);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  overflow: hidden;
+}
+.rdv:hover {
+  background: color-mix(in srgb, var(--couleur-type) 24%, #ffffff);
+}
+.rdv:focus-visible {
+  outline: 2px solid var(--couleur-principale);
+  outline-offset: 1px;
+}
+/* Une ligne de texte, coupée avec « … » si elle est trop longue */
+.rdv-ligne {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+.rdv-praticien {
+  font-weight: 600;
+  color: var(--couleur-principale);
+}
+.rdv-praticien svg {
+  vertical-align: -2px;
+  margin-right: 0.15rem;
+}
+.rdv-detail {
+  color: var(--texte-doux);
 }
 </style>

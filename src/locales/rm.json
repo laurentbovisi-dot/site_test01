@@ -77,16 +77,42 @@
     "free": "Liber"
   },
   "booking": {
-    "bookSlot": "Reservar {room} a las {time}",
+    "newBooking": "Nova reservaziun",
     "dialogTitle": "Reservar ina sala",
     "room": "Sala",
+    "chooseRoom": "Tscherner ina sala",
     "date": "Data",
-    "start": "Entschatta",
-    "end": "Fin",
+    "start": "Ura d'entschatta",
+    "chooseStart": "Tscherner in'ura",
+    "duration": "Durada",
+    "minutes": "{n} min",
     "practitioner": "Persuna spezialisada",
     "choosePractitioner": "Tscherner ina persuna spezialisada",
+    "type": "Tip",
+    "patientLastName": "Num dal pazient",
+    "patientFirstName": "Prenum dal pazient",
+    "reason": "Motiv",
+    "reasonPlaceholder": "p. ex. controlla annuala",
+    "fictionalNotice": "Demonstraziun: endatai mo datas fictivas.",
     "confirm": "Reservar",
     "cancel": "Interrumper",
-    "saveError": "La reservaziun n'ha betg pudì vegnir memorisada en quest navigatur."
+    "saveError": "La reservaziun n'ha betg pudì vegnir memorisada en quest navigatur.",
+    "closedDay": "Il center è serrà quest di.",
+    "errorClosing": "La reservaziun cuzza pli ditg che l'ura da serrar ({time}).",
+    "errorRoomTaken": "La sala è gia reservada durant ina part da quest temp.",
+    "errorPractitionerBusy": "Questa persuna spezialisada ha gia in termin durant quest temp.",
+    "bookSlot": "Reservar {room} a las {time}",
+    "detailsTitle": "Reservaziun",
+    "time": "Uras",
+    "patient": "Pazient",
+    "delete": "Stizzar la reservaziun",
+    "close": "Serrar",
+    "deleteError": "La reservaziun n'ha betg pudì vegnir stizzada.",
+    "openBooking": "Mussar la reservaziun: {details}"
+  },
+  "types": {
+    "consultation": "Consultaziun",
+    "exam": "Examinaziun",
+    "meeting": "Radunanza"
   }
 }

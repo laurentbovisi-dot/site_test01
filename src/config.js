@@ -31,6 +31,20 @@ export const horaires = {
 // Durée d'un créneau de réservation, en minutes
 export const dureeCreneau = 30
 
+// Durées proposées dans le formulaire de réservation, en minutes
+export const durees = [30, 60, 90]
+
+// Types de rendez-vous, chacun avec sa couleur et son icône Lucide.
+// - id : clé de traduction (types.xxx)
+// - patient : true si le formulaire demande le nom du patient
+// - couleur : jamais de rouge (réservé aux erreurs)
+// - icone : nom de l'icône Lucide (voir components/TypeIcon.vue)
+export const typesRendezVous = [
+  { id: 'consultation', patient: true, couleur: '#2a8c7e', icone: 'stethoscope' },
+  { id: 'exam', patient: true, couleur: '#b7791f', icone: 'microscope' },
+  { id: 'meeting', patient: false, couleur: '#5a6b7b', icone: 'users' }
+]
+
 // Les praticiens (fictifs).
 // - specialite : clé de traduction (specialties.xxx)
 // - langues : codes de langue, traduits via languages.xxx

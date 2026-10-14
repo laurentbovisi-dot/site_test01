@@ -1,6 +1,11 @@
 // Lecture et écriture des réservations dans le localStorage du navigateur.
 // Une réservation ressemble à :
-//   { id, salleId: 'lavande', date: '2026-10-14', debut: '09:00', fin: '09:30', praticienId: 'rochat' }
+//   {
+//     id, salleId: 'lavande', date: '2026-10-14', debut: '09:00', fin: '10:00',
+//     praticienId: 'rochat', type: 'consultation',
+//     patientNom: 'Exemple', patientPrenom: 'Jean', motif: 'Contrôle annuel'
+//   }
+// Pour une réunion, patientNom et patientPrenom sont vides.
 
 import { dateISO } from './dates.js'
 
@@ -41,6 +46,22 @@ export function ajouterReservation(reservation) {
   return ok ? nouvelle : null
 }
 
+// Supprime une réservation par son identifiant.
+// Renvoie true si l'enregistrement a réussi, false sinon.
+export function supprimerReservation(id) {
+  return ecrireReservations(lireReservations().filter((r) => r.id !== id))
+}
+
+// Vrai si deux plages horaires se chevauchent ('09:00'–'10:00' et '09:30'–'10:30' : oui)
+function chevauche(a, b) {
+  return a.debut < b.fin && b.debut < a.fin
+}
+
+// Réservations d'une même date qui chevauchent une plage horaire donnée
+export function reservationsEnConflit(reservations, date, debut, fin) {
+  return reservations.filter((r) => r.date === date && chevauche(r, { debut, fin }))
+}
+
 // Nombre de réservations d'une salle pour une date donnée
 export function compterReservations(salleId, date) {
   return lireReservations().filter((r) => r.salleId === salleId && r.date === date).length
@@ -49,12 +70,4 @@ export function compterReservations(salleId, date) {
 // Date du jour au format AAAA-MM-JJ
 export function dateDuJour() {
   return dateISO(new Date())
-}
-
-// Réservation d'une salle qui occupe un créneau donné (ou undefined si libre).
-// Un créneau '09:00' est occupé par une réservation 09:00–10:00, par exemple.
-export function reservationDuCreneau(reservations, salleId, date, creneau) {
-  return reservations.find(
-    (r) => r.salleId === salleId && r.date === date && r.debut <= creneau && creneau < r.fin
-  )
 }

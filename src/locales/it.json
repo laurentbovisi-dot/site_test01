@@ -77,16 +77,42 @@
     "free": "Libero"
   },
   "booking": {
-    "bookSlot": "Prenota {room} alle {time}",
+    "newBooking": "Nuova prenotazione",
     "dialogTitle": "Prenota una sala",
     "room": "Sala",
+    "chooseRoom": "Scegli una sala",
     "date": "Data",
-    "start": "Inizio",
-    "end": "Fine",
+    "start": "Ora di inizio",
+    "chooseStart": "Scegli un orario",
+    "duration": "Durata",
+    "minutes": "{n} min",
     "practitioner": "Professionista",
     "choosePractitioner": "Scegli un professionista",
+    "type": "Tipo",
+    "patientLastName": "Cognome del paziente",
+    "patientFirstName": "Nome del paziente",
+    "reason": "Motivo",
+    "reasonPlaceholder": "Es. controllo annuale",
+    "fictionalNotice": "Dimostrazione: inserire solo dati fittizi.",
     "confirm": "Prenota",
     "cancel": "Annulla",
-    "saveError": "Non è stato possibile salvare la prenotazione in questo browser."
+    "saveError": "Non è stato possibile salvare la prenotazione in questo browser.",
+    "closedDay": "Il centro è chiuso in questo giorno.",
+    "errorClosing": "La prenotazione supera l'orario di chiusura ({time}).",
+    "errorRoomTaken": "La sala è già prenotata in parte di questa fascia oraria.",
+    "errorPractitionerBusy": "Questo professionista ha già un appuntamento in questa fascia oraria.",
+    "bookSlot": "Prenota {room} alle {time}",
+    "detailsTitle": "Prenotazione",
+    "time": "Orario",
+    "patient": "Paziente",
+    "delete": "Elimina la prenotazione",
+    "close": "Chiudi",
+    "deleteError": "Non è stato possibile eliminare la prenotazione.",
+    "openBooking": "Mostra la prenotazione: {details}"
+  },
+  "types": {
+    "consultation": "Consulto",
+    "exam": "Esame",
+    "meeting": "Riunione"
   }
 }

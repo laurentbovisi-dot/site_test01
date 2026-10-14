@@ -77,16 +77,42 @@
     "free": "Libre"
   },
   "booking": {
-    "bookSlot": "Réserver {room} à {time}",
+    "newBooking": "Nouvelle réservation",
     "dialogTitle": "Réserver une salle",
     "room": "Salle",
+    "chooseRoom": "Choisir une salle",
     "date": "Date",
-    "start": "Début",
-    "end": "Fin",
+    "start": "Heure de début",
+    "chooseStart": "Choisir une heure",
+    "duration": "Durée",
+    "minutes": "{n} min",
     "practitioner": "Praticien",
     "choosePractitioner": "Choisir un praticien",
+    "type": "Type",
+    "patientLastName": "Nom du patient",
+    "patientFirstName": "Prénom du patient",
+    "reason": "Motif",
+    "reasonPlaceholder": "Ex. contrôle annuel",
+    "fictionalNotice": "Démonstration : saisissez uniquement des données fictives.",
     "confirm": "Réserver",
     "cancel": "Annuler",
-    "saveError": "La réservation n'a pas pu être enregistrée dans ce navigateur."
+    "saveError": "La réservation n'a pas pu être enregistrée dans ce navigateur.",
+    "closedDay": "Le centre est fermé ce jour-là.",
+    "errorClosing": "La réservation dépasse l'heure de fermeture ({time}).",
+    "errorRoomTaken": "La salle est déjà réservée sur une partie de ce créneau.",
+    "errorPractitionerBusy": "Ce praticien a déjà un rendez-vous sur ce créneau.",
+    "bookSlot": "Réserver {room} à {time}",
+    "detailsTitle": "Réservation",
+    "time": "Horaire",
+    "patient": "Patient",
+    "delete": "Supprimer la réservation",
+    "close": "Fermer",
+    "deleteError": "La réservation n'a pas pu être supprimée.",
+    "openBooking": "Voir la réservation : {details}"
+  },
+  "types": {
+    "consultation": "Consultation",
+    "exam": "Examen",
+    "meeting": "Réunion"
   }
 }

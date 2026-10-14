@@ -77,16 +77,42 @@
     "free": "Frei"
   },
   "booking": {
-    "bookSlot": "{room} um {time} reservieren",
+    "newBooking": "Neue Reservation",
     "dialogTitle": "Raum reservieren",
     "room": "Raum",
+    "chooseRoom": "Raum wählen",
     "date": "Datum",
     "start": "Beginn",
-    "end": "Ende",
+    "chooseStart": "Uhrzeit wählen",
+    "duration": "Dauer",
+    "minutes": "{n} Min.",
     "practitioner": "Fachperson",
     "choosePractitioner": "Fachperson wählen",
+    "type": "Art",
+    "patientLastName": "Name der Patientin / des Patienten",
+    "patientFirstName": "Vorname der Patientin / des Patienten",
+    "reason": "Grund",
+    "reasonPlaceholder": "z. B. Jahreskontrolle",
+    "fictionalNotice": "Demonstration: Bitte nur fiktive Daten eingeben.",
     "confirm": "Reservieren",
     "cancel": "Abbrechen",
-    "saveError": "Die Reservation konnte in diesem Browser nicht gespeichert werden."
+    "saveError": "Die Reservation konnte in diesem Browser nicht gespeichert werden.",
+    "closedDay": "Das Zentrum ist an diesem Tag geschlossen.",
+    "errorClosing": "Die Reservation endet nach der Schliessung ({time}).",
+    "errorRoomTaken": "Der Raum ist in diesem Zeitraum bereits teilweise reserviert.",
+    "errorPractitionerBusy": "Diese Fachperson hat in diesem Zeitraum bereits einen Termin.",
+    "bookSlot": "{room} um {time} reservieren",
+    "detailsTitle": "Reservation",
+    "time": "Zeit",
+    "patient": "Patient/in",
+    "delete": "Reservation löschen",
+    "close": "Schliessen",
+    "deleteError": "Die Reservation konnte nicht gelöscht werden.",
+    "openBooking": "Reservation anzeigen: {details}"
+  },
+  "types": {
+    "consultation": "Konsultation",
+    "exam": "Untersuchung",
+    "meeting": "Sitzung"
   }
 }

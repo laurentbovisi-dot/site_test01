@@ -8,20 +8,13 @@ import Avatar from 'primevue/avatar'
 import Tag from 'primevue/tag'
 import { Flower } from 'lucide-vue-next'
 import { etablissement, salles, horaires, praticiens } from '../config.js'
-import { formatLocal } from '../i18n.js'
+import { formaterHeure, nomComplet } from '../format.js'
 import { compterReservations, dateDuJour } from '../storage.js'
 
 const { t, locale } = useI18n()
 
 // Chemin du logo complet (tient compte du chemin base de Vite)
 const logo = import.meta.env.BASE_URL + 'logo.png'
-
-// Transforme '08:00' en heure au format local suisse de la langue choisie
-function formaterHeure(texte) {
-  const [heures, minutes] = texte.split(':').map(Number)
-  const date = new Date(2000, 0, 1, heures, minutes)
-  return new Intl.DateTimeFormat(formatLocal(), { hour: '2-digit', minute: '2-digit' }).format(date)
-}
 
 // Liste des jours avec leur horaire, recalculée quand la langue change
 const listeHoraires = computed(() => {
@@ -38,11 +31,6 @@ const listeHoraires = computed(() => {
 // Initiales pour l'avatar : « Anne-Laure Chappuis » → « AC »
 function initiales(p) {
   return (p.prenom[0] + p.nom[0]).toUpperCase()
-}
-
-// Nom complet avec le titre éventuel : « Dre Anne-Laure Chappuis »
-function nomComplet(p) {
-  return [p.titre, p.prenom, p.nom].filter(Boolean).join(' ')
 }
 
 // Nombre de réservations du jour pour chaque salle (lu dans le localStorage)

@@ -66,6 +66,11 @@ export function creneauxDuJour(date) {
   return creneaux
 }
 
+// Ajoute des minutes à une heure : ajouterMinutes('09:00', 90) → '10:30'
+export function ajouterMinutes(heure, minutes) {
+  return enTexte(enMinutes(heure) + minutes)
+}
+
 // '08:30' → 510 minutes depuis minuit
 function enMinutes(texte) {
   const [h, m] = texte.split(':').map(Number)
