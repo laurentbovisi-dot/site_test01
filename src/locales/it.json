@@ -75,5 +75,18 @@
     "time": "Ora",
     "booked": "Prenotato",
     "free": "Libero"
+  },
+  "booking": {
+    "bookSlot": "Prenota {room} alle {time}",
+    "dialogTitle": "Prenota una sala",
+    "room": "Sala",
+    "date": "Data",
+    "start": "Inizio",
+    "end": "Fine",
+    "practitioner": "Professionista",
+    "choosePractitioner": "Scegli un professionista",
+    "confirm": "Prenota",
+    "cancel": "Annulla",
+    "saveError": "Non è stato possibile salvare la prenotazione in questo browser."
   }
 }

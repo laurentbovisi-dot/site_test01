@@ -75,5 +75,18 @@
     "time": "Heure",
     "booked": "Réservé",
     "free": "Libre"
+  },
+  "booking": {
+    "bookSlot": "Réserver {room} à {time}",
+    "dialogTitle": "Réserver une salle",
+    "room": "Salle",
+    "date": "Date",
+    "start": "Début",
+    "end": "Fin",
+    "practitioner": "Praticien",
+    "choosePractitioner": "Choisir un praticien",
+    "confirm": "Réserver",
+    "cancel": "Annuler",
+    "saveError": "La réservation n'a pas pu être enregistrée dans ce navigateur."
   }
 }

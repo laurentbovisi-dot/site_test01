@@ -75,5 +75,18 @@
     "time": "Ura",
     "booked": "Reservà",
     "free": "Liber"
+  },
+  "booking": {
+    "bookSlot": "Reservar {room} a las {time}",
+    "dialogTitle": "Reservar ina sala",
+    "room": "Sala",
+    "date": "Data",
+    "start": "Entschatta",
+    "end": "Fin",
+    "practitioner": "Persuna spezialisada",
+    "choosePractitioner": "Tscherner ina persuna spezialisada",
+    "confirm": "Reservar",
+    "cancel": "Interrumper",
+    "saveError": "La reservaziun n'ha betg pudì vegnir memorisada en quest navigatur."
   }
 }

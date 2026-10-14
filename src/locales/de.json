@@ -75,5 +75,18 @@
     "time": "Zeit",
     "booked": "Reserviert",
     "free": "Frei"
+  },
+  "booking": {
+    "bookSlot": "{room} um {time} reservieren",
+    "dialogTitle": "Raum reservieren",
+    "room": "Raum",
+    "date": "Datum",
+    "start": "Beginn",
+    "end": "Ende",
+    "practitioner": "Fachperson",
+    "choosePractitioner": "Fachperson wählen",
+    "confirm": "Reservieren",
+    "cancel": "Abbrechen",
+    "saveError": "Die Reservation konnte in diesem Browser nicht gespeichert werden."
   }
 }

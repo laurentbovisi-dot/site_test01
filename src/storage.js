@@ -1,6 +1,6 @@
 // Lecture et écriture des réservations dans le localStorage du navigateur.
 // Une réservation ressemble à :
-//   { id, salleId: 'lavande', date: '2026-10-14', debut: '09:00', fin: '09:30' }
+//   { id, salleId: 'lavande', date: '2026-10-14', debut: '09:00', fin: '09:30', praticienId: 'rochat' }
 
 import { dateISO } from './dates.js'
 
@@ -17,13 +17,28 @@ export function lireReservations() {
   }
 }
 
-// Enregistre la liste complète des réservations
+// Enregistre la liste complète des réservations.
+// Renvoie true si l'enregistrement a réussi, false sinon.
 export function ecrireReservations(reservations) {
   try {
     localStorage.setItem(CLE_RESERVATIONS, JSON.stringify(reservations))
+    return true
   } catch {
-    // localStorage indisponible (navigation privée, etc.) : on ignore
+    // localStorage indisponible (navigation privée, stockage plein, etc.)
+    return false
   }
+}
+
+// Ajoute une réservation et l'enregistre.
+// Renvoie la réservation créée (avec son identifiant), ou null en cas d'échec.
+export function ajouterReservation(reservation) {
+  const nouvelle = {
+    // Identifiant unique : l'heure actuelle + un peu de hasard
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    ...reservation
+  }
+  const ok = ecrireReservations([...lireReservations(), nouvelle])
+  return ok ? nouvelle : null
 }
 
 // Nombre de réservations d'une salle pour une date donnée

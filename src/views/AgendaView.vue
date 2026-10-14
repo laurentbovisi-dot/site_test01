@@ -2,13 +2,15 @@
 // Page Agenda : grille quotidienne des salles.
 // Une colonne par salle, une ligne par créneau de 30 minutes,
 // selon les horaires d'ouverture du jour affiché.
+// Un clic sur une case libre ouvre la fenêtre de réservation.
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Button from 'primevue/button'
 import DatePicker from 'primevue/datepicker'
 import Message from 'primevue/message'
 import { Flower } from 'lucide-vue-next'
-import { salles } from '../config.js'
+import ReservationDialog from '../components/ReservationDialog.vue'
+import { salles, praticiens, horaires } from '../config.js'
 import { formatLocal } from '../i18n.js'
 import {
   aujourdhui,
@@ -16,7 +18,8 @@ import {
   jourOuvrableVoisin,
   dateEnToutesLettres,
   creneauxDuJour,
-  dateISO
+  dateISO,
+  cleJour
 } from '../dates.js'
 import { lireReservations, reservationDuCreneau } from '../storage.js'
 
@@ -61,13 +64,57 @@ function formaterHeure(creneau) {
   return new Intl.DateTimeFormat(formatLocal(), { hour: '2-digit', minute: '2-digit' }).format(date)
 }
 
-// Réservations enregistrées dans le navigateur (lues une fois à l'ouverture de la page)
-const reservations = lireReservations()
+// Réservations enregistrées dans le navigateur.
+// ref() : la grille se met à jour toute seule quand on en ajoute une.
+const reservations = ref(lireReservations())
 
 // Réservation qui occupe une case de la grille (ou undefined si la case est libre)
 function reservation(salle, creneau) {
-  return reservationDuCreneau(reservations, salle.id, dateISO(jourAffiche.value), creneau)
+  return reservationDuCreneau(reservations.value, salle.id, dateISO(jourAffiche.value), creneau)
 }
+
+// Nom court du praticien d'une réservation : « Dre Chappuis », « Sophie Cuendet »
+function nomPraticien(r) {
+  const p = praticiens.find((p) => p.id === r.praticienId)
+  if (!p) return ''
+  return p.titre ? `${p.titre} ${p.nom}` : `${p.prenom} ${p.nom}`
+}
+
+// --- Réservation d'un créneau ---
+
+// Ce qui a été cliqué : la salle et le créneau de début
+const fenetreOuverte = ref(false)
+const salleChoisie = ref(null)
+const debutChoisi = ref('')
+
+// Clic sur une case libre : on ouvre la fenêtre de réservation
+function ouvrirReservation(salle, creneau) {
+  salleChoisie.value = salle
+  debutChoisi.value = creneau
+  fenetreOuverte.value = true
+}
+
+// Heures de fin possibles : de 30 minutes après le début
+// jusqu'à la prochaine réservation de la salle ou jusqu'à la fermeture.
+const finsPossibles = computed(() => {
+  if (!salleChoisie.value) return []
+  const liste = creneaux.value
+  const fermeture = horaires[cleJour(jourAffiche.value)]?.fermeture
+  const fins = []
+  for (let i = liste.indexOf(debutChoisi.value); i >= 0 && i < liste.length; i++) {
+    if (reservation(salleChoisie.value, liste[i])) break // créneau déjà pris : on s'arrête
+    fins.push(liste[i + 1] ?? fermeture) // fin = début du créneau suivant (ou fermeture)
+  }
+  return fins
+})
+
+// Après l'enregistrement : on ajoute la réservation à la grille
+function reservationAjoutee(nouvelle) {
+  reservations.value = [...reservations.value, nouvelle]
+}
+
+// Date en toutes lettres avec une majuscule, pour la fenêtre de réservation
+const titreJourMajuscule = computed(() => titreJour.value.charAt(0).toUpperCase() + titreJour.value.slice(1))
 </script>
 
 <template>
@@ -140,19 +187,41 @@ function reservation(salle, creneau) {
           <tbody>
             <tr v-for="creneau in creneaux" :key="creneau">
               <th class="col-heure" scope="row">{{ formaterHeure(creneau) }}</th>
-              <td
-                v-for="salle in salles"
-                :key="salle.id"
-                :class="{ reservee: reservation(salle, creneau) }"
-                :aria-label="`${salle.nom}, ${formaterHeure(creneau)}`"
-              >
-                <span v-if="reservation(salle, creneau)">{{ $t('agenda.booked') }}</span>
+              <td v-for="salle in salles" :key="salle.id" :class="{ reservee: reservation(salle, creneau) }">
+                <!-- Case réservée : nom du praticien sur la première case de la réservation -->
+                <span v-if="reservation(salle, creneau)" :title="$t('agenda.booked')">
+                  <template v-if="reservation(salle, creneau).debut === creneau">
+                    {{ nomPraticien(reservation(salle, creneau)) || $t('agenda.booked') }}
+                  </template>
+                </span>
+                <!-- Case libre : un bouton qui ouvre la fenêtre de réservation -->
+                <button
+                  v-else
+                  type="button"
+                  class="case-libre"
+                  :aria-label="$t('booking.bookSlot', { room: salle.nom, time: formaterHeure(creneau) })"
+                  @click="ouvrirReservation(salle, creneau)"
+                >
+                  <i class="pi pi-plus" aria-hidden="true"></i>
+                </button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
+
+    <!-- Fenêtre de réservation (ouverte au clic sur une case libre) -->
+    <ReservationDialog
+      v-model:visible="fenetreOuverte"
+      :salle="salleChoisie"
+      :date="dateISO(jourAffiche)"
+      :dateTexte="titreJourMajuscule"
+      :debut="debutChoisi"
+      :finsPossibles="finsPossibles"
+      :formaterHeure="formaterHeure"
+      @reserve="reservationAjoutee"
+    />
   </section>
 </template>
 
@@ -231,6 +300,29 @@ function reservation(salle, creneau) {
   background: #eef3f8 !important;
   color: var(--couleur-principale);
   font-size: 0.85rem;
+  font-weight: 600;
   text-align: center;
+}
+/* Case libre : le bouton remplit toute la case, le « + » apparaît au survol */
+.grille td:not(.reservee) {
+  padding: 0;
+}
+.case-libre {
+  width: 100%;
+  height: 100%;
+  min-height: 2.4rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: transparent;
+}
+.case-libre:hover,
+.case-libre:focus-visible {
+  background: #eef3f8;
+  color: var(--couleur-principale);
+}
+.case-libre:focus-visible {
+  outline: 2px solid var(--couleur-principale);
+  outline-offset: -2px;
 }
 </style>
