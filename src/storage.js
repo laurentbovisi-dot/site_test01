@@ -2,6 +2,8 @@
 // Une réservation ressemble à :
 //   { id, salleId: 'lavande', date: '2026-10-14', debut: '09:00', fin: '09:30' }
 
+import { dateISO } from './dates.js'
+
 const CLE_RESERVATIONS = 'agenda-salles.reservations'
 
 // Renvoie la liste de toutes les réservations enregistrées
@@ -24,15 +26,20 @@ export function ecrireReservations(reservations) {
   }
 }
 
-// Date du jour au format AAAA-MM-JJ (heure locale)
-export function dateDuJour() {
-  const d = new Date()
-  const mois = String(d.getMonth() + 1).padStart(2, '0')
-  const jour = String(d.getDate()).padStart(2, '0')
-  return `${d.getFullYear()}-${mois}-${jour}`
-}
-
 // Nombre de réservations d'une salle pour une date donnée
 export function compterReservations(salleId, date) {
   return lireReservations().filter((r) => r.salleId === salleId && r.date === date).length
+}
+
+// Date du jour au format AAAA-MM-JJ
+export function dateDuJour() {
+  return dateISO(new Date())
+}
+
+// Réservation d'une salle qui occupe un créneau donné (ou undefined si libre).
+// Un créneau '09:00' est occupé par une réservation 09:00–10:00, par exemple.
+export function reservationDuCreneau(reservations, salleId, date, creneau) {
+  return reservations.find(
+    (r) => r.salleId === salleId && r.date === date && r.debut <= creneau && creneau < r.fin
+  )
 }

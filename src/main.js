@@ -1,6 +1,7 @@
 // Point d'entrée de l'application
 import { createApp } from 'vue'
 import PrimeVue from 'primevue/config'
+import Tooltip from 'primevue/tooltip'
 import 'primeicons/primeicons.css'
 
 import App from './App.vue'
@@ -21,6 +22,8 @@ app.use(PrimeVue, {
     }
   }
 })
+// Infobulles (v-tooltip) sur les boutons à icône seule
+app.directive('tooltip', Tooltip)
 app.use(router)
 app.use(i18n)
 

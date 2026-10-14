@@ -1,5 +1,9 @@
 {
-  "nav": { "home": "Accueil", "agenda": "Agenda", "language": "Langue" },
+  "nav": {
+    "home": "Accueil",
+    "agenda": "Agenda",
+    "language": "Langue"
+  },
   "home": {
     "logoAlt": "Logo du centre",
     "presentation": "Centre de soins pluridisciplinaire au cœur de Lausanne, proche du CHUV, accessible en métro (ligne M2).",
@@ -11,17 +15,65 @@
     "roomsTitle": "Nos salles",
     "bookingsToday": "Aucune réservation aujourd'hui | 1 réservation aujourd'hui | {n} réservations aujourd'hui"
   },
-  "days": { "monday": "Lundi", "tuesday": "Mardi", "wednesday": "Mercredi", "thursday": "Jeudi", "friday": "Vendredi", "saturday": "Samedi", "sunday": "Dimanche" },
-  "specialties": { "generalMedicine": "Médecine générale", "cardiology": "Cardiologie", "pediatrics": "Pédiatrie", "dermatology": "Dermatologie", "physiotherapy": "Physiothérapie", "nursing": "Soins infirmiers" },
-  "languages": { "fr": "Français", "de": "Allemand", "it": "Italien", "en": "Anglais", "rm": "Romanche" },
-  "practitioners": {
-    "chappuis": { "cv": "Diplômée de l'Université de Lausanne, 15 ans d'expérience en cabinet." },
-    "rochat": { "cv": "Formé à Lausanne et Berne, spécialiste de la prévention cardiovasculaire." },
-    "dubuis": { "cv": "Formée à Genève, suivi des enfants de 0 à 16 ans." },
-    "pasche": { "cv": "Formé à Lausanne et Zurich, dermatologie générale et dépistage." },
-    "cuendet": { "cv": "Diplômée de la HESAV, rééducation du sport et du dos." },
-    "favre": { "cv": "Diplômé de l'Institut La Source, soins ambulatoires et vaccinations." }
+  "days": {
+    "monday": "Lundi",
+    "tuesday": "Mardi",
+    "wednesday": "Mercredi",
+    "thursday": "Jeudi",
+    "friday": "Vendredi",
+    "saturday": "Samedi",
+    "sunday": "Dimanche"
   },
-  "footer": { "phone": "Tél.", "demo": "Démonstration – données fictives" },
-  "agenda": { "title": "Agenda des salles", "today": "Aujourd'hui : {date}", "comingSoon": "Le planning de réservation des salles sera bientôt disponible ici." }
+  "specialties": {
+    "generalMedicine": "Médecine générale",
+    "cardiology": "Cardiologie",
+    "pediatrics": "Pédiatrie",
+    "dermatology": "Dermatologie",
+    "physiotherapy": "Physiothérapie",
+    "nursing": "Soins infirmiers"
+  },
+  "languages": {
+    "fr": "Français",
+    "de": "Allemand",
+    "it": "Italien",
+    "en": "Anglais",
+    "rm": "Romanche"
+  },
+  "practitioners": {
+    "chappuis": {
+      "cv": "Diplômée de l'Université de Lausanne, 15 ans d'expérience en cabinet."
+    },
+    "rochat": {
+      "cv": "Formé à Lausanne et Berne, spécialiste de la prévention cardiovasculaire."
+    },
+    "dubuis": {
+      "cv": "Formée à Genève, suivi des enfants de 0 à 16 ans."
+    },
+    "pasche": {
+      "cv": "Formé à Lausanne et Zurich, dermatologie générale et dépistage."
+    },
+    "cuendet": {
+      "cv": "Diplômée de la HESAV, rééducation du sport et du dos."
+    },
+    "favre": {
+      "cv": "Diplômé de l'Institut La Source, soins ambulatoires et vaccinations."
+    }
+  },
+  "footer": {
+    "phone": "Tél.",
+    "demo": "Démonstration – données fictives"
+  },
+  "agenda": {
+    "title": "Agenda des salles",
+    "today": "Aujourd'hui",
+    "previousDay": "Jour précédent",
+    "nextDay": "Jour suivant",
+    "chooseDate": "Choisir une date",
+    "previousMonth": "Mois précédent",
+    "nextMonth": "Mois suivant",
+    "closed": "Le centre est fermé ce jour-là.",
+    "time": "Heure",
+    "booked": "Réservé",
+    "free": "Libre"
+  }
 }

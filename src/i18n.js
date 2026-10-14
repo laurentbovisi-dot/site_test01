@@ -50,3 +50,28 @@ export function formatLocal() {
   const code = i18n.global.locale.value
   return langues.find((l) => l.code === code)?.formatLocal ?? 'fr-CH'
 }
+
+// Textes du calendrier PrimeVue (DatePicker) dans la langue choisie.
+// Les noms des jours et des mois sont fournis par le navigateur (Intl),
+// au format local suisse ; le reste vient des fichiers de traduction.
+export function localePrimeVue() {
+  const format = formatLocal()
+  const t = i18n.global.t
+  // Le 4 janvier 2026 est un dimanche : on part de là pour les 7 jours
+  const jours = [...Array(7).keys()].map((i) => new Date(2026, 0, 4 + i))
+  const mois = [...Array(12).keys()].map((i) => new Date(2026, i, 1))
+  const nom = (date, options) => new Intl.DateTimeFormat(format, options).format(date)
+  return {
+    dayNames: jours.map((d) => nom(d, { weekday: 'long' })),
+    dayNamesShort: jours.map((d) => nom(d, { weekday: 'short' })),
+    dayNamesMin: jours.map((d) => nom(d, { weekday: 'short' }).slice(0, 2)),
+    monthNames: mois.map((d) => nom(d, { month: 'long' })),
+    monthNamesShort: mois.map((d) => nom(d, { month: 'short' })),
+    firstDayOfWeek: 1, // la semaine commence le lundi
+    dateFormat: 'dd.mm.yy', // format suisse : 17.10.2026
+    today: t('agenda.today'),
+    chooseDate: t('agenda.chooseDate'),
+    prevMonth: t('agenda.previousMonth'),
+    nextMonth: t('agenda.nextMonth')
+  }
+}
