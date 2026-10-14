@@ -1,0 +1,27 @@
+{
+  "nav": { "home": "Startseite", "agenda": "Agenda", "language": "Sprache" },
+  "home": {
+    "logoAlt": "Logo des Zentrums",
+    "presentation": "Interdisziplinäres Gesundheitszentrum im Herzen von Lausanne, nahe dem CHUV, mit der Metro (Linie M2) erreichbar.",
+    "bookRoom": "Raum reservieren",
+    "hoursTitle": "Öffnungszeiten",
+    "closed": "Geschlossen",
+    "teamTitle": "Unser Team",
+    "languages": "Sprachen",
+    "roomsTitle": "Unsere Räume",
+    "bookingsToday": "Heute keine Reservation | 1 Reservation heute | {n} Reservationen heute"
+  },
+  "days": { "monday": "Montag", "tuesday": "Dienstag", "wednesday": "Mittwoch", "thursday": "Donnerstag", "friday": "Freitag", "saturday": "Samstag", "sunday": "Sonntag" },
+  "specialties": { "generalMedicine": "Allgemeinmedizin", "cardiology": "Kardiologie", "pediatrics": "Pädiatrie", "dermatology": "Dermatologie", "physiotherapy": "Physiotherapie", "nursing": "Pflege" },
+  "languages": { "fr": "Französisch", "de": "Deutsch", "it": "Italienisch", "en": "Englisch", "rm": "Rätoromanisch" },
+  "practitioners": {
+    "chappuis": { "cv": "Diplom der Universität Lausanne, 15 Jahre Erfahrung in der Praxis." },
+    "rochat": { "cv": "Ausgebildet in Lausanne und Bern, Spezialist für kardiovaskuläre Prävention." },
+    "dubuis": { "cv": "Ausgebildet in Genf, betreut Kinder von 0 bis 16 Jahren." },
+    "pasche": { "cv": "Ausgebildet in Lausanne und Zürich, allgemeine Dermatologie und Früherkennung." },
+    "cuendet": { "cv": "Diplom der HESAV, Sport- und Rückenrehabilitation." },
+    "favre": { "cv": "Diplom des Institut La Source, ambulante Pflege und Impfungen." }
+  },
+  "footer": { "phone": "Tel.", "demo": "Demonstration – fiktive Daten" },
+  "agenda": { "title": "Raumagenda", "today": "Heute: {date}", "comingSoon": "Die Planung der Raumreservationen ist hier bald verfügbar." }
+}

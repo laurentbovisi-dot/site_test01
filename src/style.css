@@ -1,0 +1,44 @@
+/* Styles généraux de l'application (mode clair uniquement) */
+:root {
+  --couleur-principale: #173855; /* bleu marine du logo */
+  --couleur-secondaire: #769971; /* vert sauge du logo */
+  --fond-page: #f7f9f7;
+  --fond-carte: #ffffff;
+  --texte: #1f2a33;
+  --texte-doux: #5b6670;
+  --bordure: #e2e8e2;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--fond-page);
+  color: var(--texte);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+/* Largeur maximale du contenu, avec une marge sur les côtés */
+.conteneur {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Titre de section, souligné de vert sauge */
+.titre-section {
+  color: var(--couleur-principale);
+  font-size: 1.5rem;
+  margin: 0 0 1.25rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 3px solid var(--couleur-secondaire);
+  display: inline-block;
+}
+
+.section {
+  padding: 2.5rem 0;
+}

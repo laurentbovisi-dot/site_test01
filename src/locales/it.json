@@ -1,0 +1,27 @@
+{
+  "nav": { "home": "Pagina iniziale", "agenda": "Agenda", "language": "Lingua" },
+  "home": {
+    "logoAlt": "Logo del centro",
+    "presentation": "Centro di cura pluridisciplinare nel cuore di Losanna, vicino al CHUV, raggiungibile in metropolitana (linea M2).",
+    "bookRoom": "Prenota una sala",
+    "hoursTitle": "Orari di apertura",
+    "closed": "Chiuso",
+    "teamTitle": "Il nostro team",
+    "languages": "Lingue",
+    "roomsTitle": "Le nostre sale",
+    "bookingsToday": "Nessuna prenotazione oggi | 1 prenotazione oggi | {n} prenotazioni oggi"
+  },
+  "days": { "monday": "Lunedì", "tuesday": "Martedì", "wednesday": "Mercoledì", "thursday": "Giovedì", "friday": "Venerdì", "saturday": "Sabato", "sunday": "Domenica" },
+  "specialties": { "generalMedicine": "Medicina generale", "cardiology": "Cardiologia", "pediatrics": "Pediatria", "dermatology": "Dermatologia", "physiotherapy": "Fisioterapia", "nursing": "Cure infermieristiche" },
+  "languages": { "fr": "Francese", "de": "Tedesco", "it": "Italiano", "en": "Inglese", "rm": "Romancio" },
+  "practitioners": {
+    "chappuis": { "cv": "Laureata all'Università di Losanna, 15 anni di esperienza in studio medico." },
+    "rochat": { "cv": "Formato a Losanna e Berna, specialista della prevenzione cardiovascolare." },
+    "dubuis": { "cv": "Formata a Ginevra, segue i bambini da 0 a 16 anni." },
+    "pasche": { "cv": "Formato a Losanna e Zurigo, dermatologia generale e screening." },
+    "cuendet": { "cv": "Diplomata alla HESAV, riabilitazione sportiva e della schiena." },
+    "favre": { "cv": "Diplomato all'Institut La Source, cure ambulatoriali e vaccinazioni." }
+  },
+  "footer": { "phone": "Tel.", "demo": "Dimostrazione – dati fittizi" },
+  "agenda": { "title": "Agenda delle sale", "today": "Oggi: {date}", "comingSoon": "La pianificazione delle prenotazioni delle sale sarà presto disponibile qui." }
+}
