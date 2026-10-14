@@ -52,16 +52,6 @@ export function supprimerReservation(id) {
   return ecrireReservations(lireReservations().filter((r) => r.id !== id))
 }
 
-// Vrai si deux plages horaires se chevauchent ('09:00'–'10:00' et '09:30'–'10:30' : oui)
-function chevauche(a, b) {
-  return a.debut < b.fin && b.debut < a.fin
-}
-
-// Réservations d'une même date qui chevauchent une plage horaire donnée
-export function reservationsEnConflit(reservations, date, debut, fin) {
-  return reservations.filter((r) => r.date === date && chevauche(r, { debut, fin }))
-}
-
 // Nombre de réservations d'une salle pour une date donnée
 export function compterReservations(salleId, date) {
   return lireReservations().filter((r) => r.salleId === salleId && r.date === date).length

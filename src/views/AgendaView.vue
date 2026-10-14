@@ -4,7 +4,7 @@
 // selon les horaires d'ouverture du jour affiché.
 // - Clic sur une case libre (ou bouton « Nouvelle réservation ») : formulaire de réservation.
 // - Clic sur un rendez-vous : détail, avec un bouton pour le supprimer.
-import { ref, computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import Button from 'primevue/button'
 import DatePicker from 'primevue/datepicker'
 import Message from 'primevue/message'
@@ -57,8 +57,21 @@ const creneaux = computed(() => creneauxDuJour(jourAffiche.value))
 // ref() : la grille se met à jour toute seule quand on en ajoute ou en supprime une.
 const reservations = ref(lireReservations())
 
+// Heure actuelle, mise à jour chaque minute : les créneaux passés ne sont plus réservables
+const maintenant = ref(new Date())
+const minuterie = setInterval(() => (maintenant.value = new Date()), 60 * 1000)
+onUnmounted(() => clearInterval(minuterie))
+
+// Vrai si un créneau du jour affiché a déjà commencé
+function estPasse(creneau) {
+  const [h, m] = creneau.split(':').map(Number)
+  const j = jourAffiche.value
+  return new Date(j.getFullYear(), j.getMonth(), j.getDate(), h, m) < maintenant.value
+}
+
 // Contenu de la grille : pour chaque créneau, une case par salle.
 // Une case peut être :
+//  - 'passee'  : créneau libre mais déjà passé (on ne peut plus le réserver) ;
 //  - 'libre'   : personne n'a réservé la salle à cette heure ;
 //  - 'debut'   : un rendez-vous commence ici (il s'étend sur « hauteur » lignes) ;
 //  - 'couverte': la case est cachée sous un rendez-vous commencé plus haut.
@@ -71,7 +84,7 @@ const lignes = computed(() => {
     creneau,
     cases: salles.map((salle) => {
       const r = duJour.find((r) => r.salleId === salle.id && r.debut <= creneau && creneau < r.fin)
-      if (!r) return { salle, etat: 'libre' }
+      if (!r) return { salle, etat: estPasse(creneau) ? 'passee' : 'libre' }
       // Le bloc commence au début du rendez-vous (ou à la première ligne s'il commence avant)
       if (r.debut !== creneau && index > 0) return { salle, etat: 'couverte' }
       const hauteur = liste.filter((c) => c >= creneau && c < r.fin).length
@@ -214,8 +227,11 @@ function reservationSupprimee(id) {
               <th class="col-heure" scope="row">{{ formaterHeure(ligne.creneau) }}</th>
 
               <template v-for="c in ligne.cases" :key="c.salle.id">
+                <!-- Case passée : rien à réserver -->
+                <td v-if="c.etat === 'passee'" class="case-passee"></td>
+
                 <!-- Case libre : un bouton qui ouvre le formulaire -->
-                <td v-if="c.etat === 'libre'" class="case-libre">
+                <td v-else-if="c.etat === 'libre'" class="case-libre">
                   <button
                     type="button"
                     class="bouton-case"
@@ -389,6 +405,11 @@ function reservationSupprimee(id) {
 .bouton-case:focus-visible {
   outline: 2px solid var(--couleur-principale);
   outline-offset: -2px;
+}
+
+/* Case passée : fond hachuré gris très clair */
+.case-passee {
+  background: repeating-linear-gradient(-45deg, #f6f7f6 0 6px, #eef0ee 6px 12px);
 }
 
 /* Rendez-vous : bloc teinté de la couleur de son type, avec une bordure à gauche */

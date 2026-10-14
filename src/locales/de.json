@@ -97,10 +97,6 @@
     "confirm": "Reservieren",
     "cancel": "Abbrechen",
     "saveError": "Die Reservation konnte in diesem Browser nicht gespeichert werden.",
-    "closedDay": "Das Zentrum ist an diesem Tag geschlossen.",
-    "errorClosing": "Die Reservation endet nach der Schliessung ({time}).",
-    "errorRoomTaken": "Der Raum ist in diesem Zeitraum bereits teilweise reserviert.",
-    "errorPractitionerBusy": "Diese Fachperson hat in diesem Zeitraum bereits einen Termin.",
     "bookSlot": "{room} um {time} reservieren",
     "detailsTitle": "Reservation",
     "time": "Zeit",
@@ -114,5 +110,27 @@
     "consultation": "Konsultation",
     "exam": "Untersuchung",
     "meeting": "Sitzung"
+  },
+  "validation": {
+    "required": {
+      "salleId": "Bitte wählen Sie einen Raum.",
+      "date": "Bitte wählen Sie ein Datum.",
+      "debut": "Bitte wählen Sie eine Anfangszeit.",
+      "duree": "Bitte wählen Sie eine Dauer.",
+      "praticienId": "Bitte wählen Sie eine Fachperson.",
+      "type": "Bitte wählen Sie eine Terminart.",
+      "patientNom": "Bitte geben Sie den Namen der Patientin / des Patienten ein.",
+      "patientPrenom": "Bitte geben Sie den Vornamen der Patientin / des Patienten ein.",
+      "motif": "Bitte geben Sie den Grund des Termins ein."
+    },
+    "sunday": "Das Zentrum ist sonntags geschlossen: Bitte wählen Sie einen anderen Tag.",
+    "closedDay": "Das Zentrum ist an diesem Tag geschlossen: Bitte wählen Sie einen anderen Tag.",
+    "past": "Dieser Zeitpunkt liegt in der Vergangenheit: Bitte wählen Sie ein künftiges Datum und eine künftige Uhrzeit.",
+    "beforeOpening": "Das Zentrum öffnet um {time}: Die Reservation kann nicht früher beginnen.",
+    "afterClosing": "Das Zentrum schliesst um {time}: Diese Reservation würde um {end} enden. Bitte wählen Sie eine frühere Uhrzeit oder eine kürzere Dauer.",
+    "roomTaken": "Der Raum {room} ist von {start} bis {end} bereits reserviert.",
+    "practitionerBusy": "{name} hat von {start} bis {end} bereits einen Termin (Raum {room}).",
+    "patientBusy": "Die Patientin / der Patient {name} hat von {start} bis {end} bereits einen Termin (Raum {room}).",
+    "summary": "Bitte korrigieren Sie die markierten Felder, um zu reservieren."
   }
 }

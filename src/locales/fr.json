@@ -97,10 +97,6 @@
     "confirm": "Réserver",
     "cancel": "Annuler",
     "saveError": "La réservation n'a pas pu être enregistrée dans ce navigateur.",
-    "closedDay": "Le centre est fermé ce jour-là.",
-    "errorClosing": "La réservation dépasse l'heure de fermeture ({time}).",
-    "errorRoomTaken": "La salle est déjà réservée sur une partie de ce créneau.",
-    "errorPractitionerBusy": "Ce praticien a déjà un rendez-vous sur ce créneau.",
     "bookSlot": "Réserver {room} à {time}",
     "detailsTitle": "Réservation",
     "time": "Horaire",
@@ -114,5 +110,27 @@
     "consultation": "Consultation",
     "exam": "Examen",
     "meeting": "Réunion"
+  },
+  "validation": {
+    "required": {
+      "salleId": "Choisissez une salle.",
+      "date": "Choisissez une date.",
+      "debut": "Choisissez une heure de début.",
+      "duree": "Choisissez une durée.",
+      "praticienId": "Choisissez un praticien.",
+      "type": "Choisissez un type de rendez-vous.",
+      "patientNom": "Indiquez le nom du patient.",
+      "patientPrenom": "Indiquez le prénom du patient.",
+      "motif": "Indiquez le motif du rendez-vous."
+    },
+    "sunday": "Le centre est fermé le dimanche : choisissez un autre jour.",
+    "closedDay": "Le centre est fermé ce jour-là : choisissez un autre jour.",
+    "past": "Ce créneau est déjà passé : choisissez une date et une heure à venir.",
+    "beforeOpening": "Le centre ouvre à {time} : la réservation ne peut pas commencer avant.",
+    "afterClosing": "Le centre ferme à {time} : cette réservation finirait à {end}. Choisissez une heure plus tôt ou une durée plus courte.",
+    "roomTaken": "La salle {room} est déjà réservée de {start} à {end}.",
+    "practitionerBusy": "{name} a déjà un rendez-vous de {start} à {end} (salle {room}).",
+    "patientBusy": "Le patient {name} a déjà un rendez-vous de {start} à {end} (salle {room}).",
+    "summary": "Corrigez les champs signalés pour pouvoir réserver."
   }
 }

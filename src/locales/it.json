@@ -97,10 +97,6 @@
     "confirm": "Prenota",
     "cancel": "Annulla",
     "saveError": "Non è stato possibile salvare la prenotazione in questo browser.",
-    "closedDay": "Il centro è chiuso in questo giorno.",
-    "errorClosing": "La prenotazione supera l'orario di chiusura ({time}).",
-    "errorRoomTaken": "La sala è già prenotata in parte di questa fascia oraria.",
-    "errorPractitionerBusy": "Questo professionista ha già un appuntamento in questa fascia oraria.",
     "bookSlot": "Prenota {room} alle {time}",
     "detailsTitle": "Prenotazione",
     "time": "Orario",
@@ -114,5 +110,27 @@
     "consultation": "Consulto",
     "exam": "Esame",
     "meeting": "Riunione"
+  },
+  "validation": {
+    "required": {
+      "salleId": "Scegli una sala.",
+      "date": "Scegli una data.",
+      "debut": "Scegli un'ora di inizio.",
+      "duree": "Scegli una durata.",
+      "praticienId": "Scegli un professionista.",
+      "type": "Scegli un tipo di appuntamento.",
+      "patientNom": "Indica il cognome del paziente.",
+      "patientPrenom": "Indica il nome del paziente.",
+      "motif": "Indica il motivo dell'appuntamento."
+    },
+    "sunday": "Il centro è chiuso la domenica: scegli un altro giorno.",
+    "closedDay": "Il centro è chiuso in questo giorno: scegli un altro giorno.",
+    "past": "Questa fascia oraria è già passata: scegli una data e un'ora future.",
+    "beforeOpening": "Il centro apre alle {time}: la prenotazione non può iniziare prima.",
+    "afterClosing": "Il centro chiude alle {time}: questa prenotazione terminerebbe alle {end}. Scegli un orario più presto o una durata più breve.",
+    "roomTaken": "La sala {room} è già prenotata dalle {start} alle {end}.",
+    "practitionerBusy": "{name} ha già un appuntamento dalle {start} alle {end} (sala {room}).",
+    "patientBusy": "Il paziente {name} ha già un appuntamento dalle {start} alle {end} (sala {room}).",
+    "summary": "Correggi i campi segnalati per poter prenotare."
   }
 }

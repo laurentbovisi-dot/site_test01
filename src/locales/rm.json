@@ -97,10 +97,6 @@
     "confirm": "Reservar",
     "cancel": "Interrumper",
     "saveError": "La reservaziun n'ha betg pudì vegnir memorisada en quest navigatur.",
-    "closedDay": "Il center è serrà quest di.",
-    "errorClosing": "La reservaziun cuzza pli ditg che l'ura da serrar ({time}).",
-    "errorRoomTaken": "La sala è gia reservada durant ina part da quest temp.",
-    "errorPractitionerBusy": "Questa persuna spezialisada ha gia in termin durant quest temp.",
     "bookSlot": "Reservar {room} a las {time}",
     "detailsTitle": "Reservaziun",
     "time": "Uras",
@@ -114,5 +110,27 @@
     "consultation": "Consultaziun",
     "exam": "Examinaziun",
     "meeting": "Radunanza"
+  },
+  "validation": {
+    "required": {
+      "salleId": "Tscherni ina sala.",
+      "date": "Tscherni ina data.",
+      "debut": "Tscherni in'ura d'entschatta.",
+      "duree": "Tscherni ina durada.",
+      "praticienId": "Tscherni ina persuna spezialisada.",
+      "type": "Tscherni in tip da termin.",
+      "patientNom": "Endatescha il num dal pazient.",
+      "patientPrenom": "Endatescha il prenum dal pazient.",
+      "motif": "Endatescha il motiv dal termin."
+    },
+    "sunday": "Il center è serrà la dumengia: tscherni in auter di.",
+    "closedDay": "Il center è serrà quest di: tscherni in auter di.",
+    "past": "Quest temp è gia passà: tscherni ina data ed in'ura en il futur.",
+    "beforeOpening": "Il center avra a las {time}: la reservaziun na po betg cumenzar pli baud.",
+    "afterClosing": "Il center serra a las {time}: questa reservaziun terminass a las {end}. Tscherni in'ura pli baud u ina durada pli curta.",
+    "roomTaken": "La sala {room} è gia reservada da las {start} fin las {end}.",
+    "practitionerBusy": "{name} ha gia in termin da las {start} fin las {end} (sala {room}).",
+    "patientBusy": "Il pazient {name} ha gia in termin da las {start} fin las {end} (sala {room}).",
+    "summary": "Curregi ils champs marcads per pudair reservar."
   }
 }

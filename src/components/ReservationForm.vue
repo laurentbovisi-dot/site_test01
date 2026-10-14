@@ -14,10 +14,11 @@ import Button from 'primevue/button'
 import Message from 'primevue/message'
 import { Flower } from 'lucide-vue-next'
 import TypeIcon from './TypeIcon.vue'
-import { salles, praticiens, horaires, durees, typesRendezVous } from '../config.js'
-import { creneauxDuJour, ajouterMinutes, dateISO, cleJour } from '../dates.js'
-import { ajouterReservation, reservationsEnConflit } from '../storage.js'
-import { formaterHeure, nomComplet } from '../format.js'
+import { salles, praticiens, durees, typesRendezVous } from '../config.js'
+import { creneauxDuJour, ajouterMinutes, dateISO, aujourdhui } from '../dates.js'
+import { ajouterReservation } from '../storage.js'
+import { formaterHeure, nomComplet, trouverPraticien, nomPatient } from '../format.js'
+import { validerReservation, typeAvecPatient } from '../validation.js'
 
 const props = defineProps({
   // Valeurs de départ : { salleId, date (objet Date), debut ('09:00') }
@@ -45,6 +46,8 @@ const patientNom = ref('')
 const patientPrenom = ref('')
 const motif = ref('')
 const erreurEnregistrement = ref(false)
+// Devient vrai au premier clic sur « Réserver » : on affiche alors les champs manquants
+const tentative = ref(false)
 
 // À chaque ouverture : on remet le formulaire à zéro avec les valeurs de départ
 watch(visible, (ouvert) => {
@@ -59,6 +62,7 @@ watch(visible, (ouvert) => {
   patientPrenom.value = ''
   motif.value = ''
   erreurEnregistrement.value = false
+  tentative.value = false
 })
 
 // --- Listes des menus déroulants ---
@@ -84,47 +88,80 @@ const optionsPraticiens = computed(() =>
 
 const optionsTypes = computed(() => typesRendezVous.map((ty) => ({ ...ty, libelle: t('types.' + ty.id) })))
 
-// --- Règles du formulaire ---
+// --- Règles du formulaire (voir validation.js) ---
 
 // Le type choisi demande-t-il un patient ? (non pour une réunion)
-const avecPatient = computed(() => typesRendezVous.find((ty) => ty.id === type.value)?.patient ?? true)
+const avecPatient = computed(() => typeAvecPatient(type.value))
 
 // Heure de fin calculée : début + durée
 const fin = computed(() => (debut.value ? ajouterMinutes(debut.value, duree.value) : null))
 
-// Problèmes à signaler (en rouge) : jour fermé, fermeture dépassée, conflits
-const problemes = computed(() => {
-  const liste = []
-  if (!date.value) return liste
-  const horaire = horaires[cleJour(date.value)]
-  if (!horaire) return [t('booking.closedDay')]
-  if (!debut.value) return liste
+// Résultat de la validation, recalculé à chaque changement d'un champ
+const validation = computed(() =>
+  validerReservation(
+    {
+      salleId: salleId.value,
+      date: date.value,
+      debut: debut.value,
+      duree: duree.value,
+      praticienId: praticienId.value,
+      type: type.value,
+      patientNom: patientNom.value,
+      patientPrenom: patientPrenom.value,
+      motif: motif.value
+    },
+    props.reservations,
+    new Date()
+  )
+)
 
-  if (fin.value > horaire.fermeture) {
-    liste.push(t('booking.errorClosing', { time: formaterHeure(horaire.fermeture) }))
-  }
-  const conflits = reservationsEnConflit(props.reservations, dateISO(date.value), debut.value, fin.value)
-  if (salleId.value && conflits.some((r) => r.salleId === salleId.value)) {
-    liste.push(t('booking.errorRoomTaken'))
-  }
-  if (praticienId.value && conflits.some((r) => r.praticienId === praticienId.value)) {
-    liste.push(t('booking.errorPractitionerBusy'))
-  }
-  return liste
-})
+// Message d'un champ obligatoire vide (affiché seulement après un clic sur « Réserver »)
+function erreurChamp(champ) {
+  return tentative.value && validation.value.champs[champ] ? t('validation.required.' + champ) : ''
+}
 
-// Tous les champs obligatoires sont-ils remplis ?
-const champsRemplis = computed(() => {
-  const base = salleId.value && date.value && debut.value && duree.value && praticienId.value && type.value
-  const patient = !avecPatient.value || (patientNom.value.trim() && patientPrenom.value.trim())
-  return Boolean(base && patient)
-})
+// Texte clair pour chaque règle non respectée
+function texteRegle(regle) {
+  const c = regle.conflit
+  // Infos sur la réservation en conflit : horaire et salle
+  const infos = c
+    ? { start: formaterHeure(c.debut), end: formaterHeure(c.fin), room: salles.find((s) => s.id === c.salleId)?.nom }
+    : {}
+  switch (regle.code) {
+    case 'dimanche':
+      return t('validation.sunday')
+    case 'jourFerme':
+      return t('validation.closedDay')
+    case 'passe':
+      return t('validation.past')
+    case 'avantOuverture':
+      return t('validation.beforeOpening', { time: formaterHeure(regle.heure) })
+    case 'apresFermeture':
+      return t('validation.afterClosing', { time: formaterHeure(regle.heure), end: formaterHeure(fin.value) })
+    case 'salleOccupee':
+      return t('validation.roomTaken', infos)
+    case 'praticienOccupe':
+      return t('validation.practitionerBusy', { ...infos, name: nomComplet(trouverPraticien(c.praticienId)) })
+    case 'patientOccupe':
+      return t('validation.patientBusy', { ...infos, name: nomPatient(c) })
+    default:
+      return ''
+  }
+}
 
-const peutValider = computed(() => champsRemplis.value && problemes.value.length === 0)
+// Règles non respectées, traduites (affichées en rouge dès qu'elles apparaissent)
+const messagesRegles = computed(() => validation.value.regles.map(texteRegle))
+
+// Vrai s'il manque au moins un champ obligatoire
+const champsManquants = computed(() => Object.keys(validation.value.champs).length > 0)
+
+// La réservation peut être enregistrée s'il n'y a aucune erreur
+const estValide = computed(() => !champsManquants.value && messagesRegles.value.length === 0)
 
 // --- Validation ---
 function reserver() {
-  if (!peutValider.value) return
+  tentative.value = true // affiche les messages des champs manquants
+  if (!estValide.value) return
   const reservation = ajouterReservation({
     salleId: salleId.value,
     date: dateISO(date.value),
@@ -165,6 +202,7 @@ function reserver() {
           optionLabel="nom"
           optionValue="id"
           :placeholder="$t('booking.chooseRoom')"
+          :invalid="Boolean(erreurChamp('salleId'))"
           fluid
         >
           <template #option="{ option }">
@@ -174,6 +212,7 @@ function reserver() {
             </span>
           </template>
         </Select>
+        <small v-if="erreurChamp('salleId')" class="erreur-champ">{{ erreurChamp('salleId') }}</small>
       </div>
 
       <!-- Date et heure de début, côte à côte -->
@@ -184,12 +223,15 @@ function reserver() {
             v-model="date"
             inputId="resa-date"
             :disabledDays="[0]"
+            :minDate="aujourdhui()"
             showIcon
             iconDisplay="input"
             :manualInput="false"
             appendTo="body"
+            :invalid="Boolean(erreurChamp('date'))"
             fluid
           />
+          <small v-if="erreurChamp('date')" class="erreur-champ">{{ erreurChamp('date') }}</small>
         </div>
         <div class="champ">
           <label for="resa-debut">{{ $t('booking.start') }}</label>
@@ -200,8 +242,10 @@ function reserver() {
             optionLabel="texte"
             optionValue="valeur"
             :placeholder="$t('booking.chooseStart')"
+            :invalid="Boolean(erreurChamp('debut'))"
             fluid
           />
+          <small v-if="erreurChamp('debut')" class="erreur-champ">{{ erreurChamp('debut') }}</small>
         </div>
       </div>
 
@@ -228,6 +272,7 @@ function reserver() {
           optionLabel="libelle"
           optionValue="id"
           :placeholder="$t('booking.choosePractitioner')"
+          :invalid="Boolean(erreurChamp('praticienId'))"
           fluid
         >
           <template #option="{ option }">
@@ -237,6 +282,7 @@ function reserver() {
             </div>
           </template>
         </Select>
+        <small v-if="erreurChamp('praticienId')" class="erreur-champ">{{ erreurChamp('praticienId') }}</small>
       </div>
 
       <!-- Type de rendez-vous -->
@@ -264,11 +310,13 @@ function reserver() {
         <div class="deux-colonnes">
           <div class="champ">
             <label for="resa-nom">{{ $t('booking.patientLastName') }}</label>
-            <InputText id="resa-nom" v-model="patientNom" autocomplete="off" fluid />
+            <InputText id="resa-nom" v-model="patientNom" autocomplete="off" :invalid="Boolean(erreurChamp('patientNom'))" fluid />
+            <small v-if="erreurChamp('patientNom')" class="erreur-champ">{{ erreurChamp('patientNom') }}</small>
           </div>
           <div class="champ">
             <label for="resa-prenom">{{ $t('booking.patientFirstName') }}</label>
-            <InputText id="resa-prenom" v-model="patientPrenom" autocomplete="off" fluid />
+            <InputText id="resa-prenom" v-model="patientPrenom" autocomplete="off" :invalid="Boolean(erreurChamp('patientPrenom'))" fluid />
+            <small v-if="erreurChamp('patientPrenom')" class="erreur-champ">{{ erreurChamp('patientPrenom') }}</small>
           </div>
         </div>
         <p class="avertissement">
@@ -280,12 +328,25 @@ function reserver() {
       <!-- Motif -->
       <div class="champ">
         <label for="resa-motif">{{ $t('booking.reason') }}</label>
-        <Textarea id="resa-motif" v-model="motif" rows="2" autoResize :placeholder="$t('booking.reasonPlaceholder')" fluid />
+        <Textarea
+          id="resa-motif"
+          v-model="motif"
+          rows="2"
+          autoResize
+          :placeholder="$t('booking.reasonPlaceholder')"
+          :invalid="Boolean(erreurChamp('motif'))"
+          fluid
+        />
+        <small v-if="erreurChamp('motif')" class="erreur-champ">{{ erreurChamp('motif') }}</small>
       </div>
 
-      <!-- Erreurs (en rouge : couleur réservée aux erreurs) -->
-      <Message v-for="probleme in problemes" :key="probleme" severity="error" icon="pi pi-exclamation-circle">
-        {{ probleme }}
+      <!-- Règles non respectées (en rouge : couleur réservée aux erreurs) -->
+      <Message v-for="message in messagesRegles" :key="message" severity="error" icon="pi pi-exclamation-circle">
+        {{ message }}
+      </Message>
+      <!-- Rappel général s'il manque des champs après un clic sur « Réserver » -->
+      <Message v-if="tentative && champsManquants" severity="error" icon="pi pi-exclamation-circle">
+        {{ $t('validation.summary') }}
       </Message>
       <Message v-if="erreurEnregistrement" severity="error" icon="pi pi-times-circle">
         {{ $t('booking.saveError') }}
@@ -297,7 +358,7 @@ function reserver() {
 
     <template #footer>
       <Button :label="$t('booking.cancel')" severity="secondary" text @click="visible = false" />
-      <Button :label="$t('booking.confirm')" icon="pi pi-check" :disabled="!peutValider" @click="reserver" />
+      <Button :label="$t('booking.confirm')" icon="pi pi-check" @click="reserver" />
     </template>
   </Dialog>
 </template>
@@ -343,6 +404,11 @@ function reserver() {
 .specialite {
   font-size: 0.85rem;
   color: var(--couleur-secondaire);
+}
+/* Message d'erreur sous un champ (rouge : réservé aux erreurs) */
+.erreur-champ {
+  color: var(--p-red-600, #dc2626);
+  font-size: 0.85rem;
 }
 .avertissement {
   margin: -0.4rem 0 0;
